@@ -1,0 +1,23 @@
+server:
+  port: 8084
+
+spring:
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/notificationdb
+    username: postgres
+    password: postgres
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: notification-group
+      auto-offset-reset: earliest
