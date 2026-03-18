@@ -4,7 +4,7 @@ server:
 spring:
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/inventorydb
+    url: jdbc:postgresql://postgres:5432/inventorydb
     username: postgres
     password: postgres
 
@@ -17,7 +17,7 @@ spring:
     locations: classpath:db/migration
 
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: kafka:9092
     consumer:
       group-id: inventory-group
       auto-offset-reset: earliest

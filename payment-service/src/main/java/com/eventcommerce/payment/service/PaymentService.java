@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 
 @Slf4j
@@ -36,7 +37,7 @@ public class PaymentService {
 
         Payment payment = new Payment();
         payment.setOrderId(payload.getOrderId());
-        payment.setAmount(payload.getAmount());
+        payment.setAmount(BigDecimal.valueOf(payload.getAmount()));
 
         if (success) {
             payment.setStatus(PaymentStatus.SUCCESS);

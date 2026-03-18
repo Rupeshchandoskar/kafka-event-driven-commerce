@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 
 @Slf4j
@@ -36,7 +37,7 @@ public class OrderService {
         Order order = new Order();
 
         order.setUserId(request.getUserId());
-        order.setAmount(request.getAmount());
+        order.setAmount(BigDecimal.valueOf(request.getAmount()));
         order.setStatus(OrderStatus.CREATED);
 
         order = orderRepository.save(order);
@@ -56,7 +57,7 @@ public class OrderService {
 
             payload.setOrderId(order.getId());
             payload.setUserId(order.getUserId());
-            payload.setAmount(order.getAmount());
+            payload.setAmount(order.getAmount().doubleValue());
 
             BaseEvent<OrderCreatedPayload> event = new BaseEvent<>();
 

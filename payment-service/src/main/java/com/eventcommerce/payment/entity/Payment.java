@@ -4,6 +4,8 @@ import com.eventcommerce.common.enums.PaymentStatus;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 @Data
 @Entity
 @Table(name = "payments")
@@ -15,7 +17,7 @@ public class Payment {
 
     private String orderId;
 
-    private Double amount;
+    private BigDecimal amount;
 
     @Enumerated(EnumType.STRING)
     private PaymentStatus status;
