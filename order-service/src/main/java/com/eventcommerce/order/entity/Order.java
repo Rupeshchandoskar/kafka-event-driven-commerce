@@ -18,6 +18,10 @@ public class Order {
 
     private String userId;
 
+    private String productId;
+
+    private Integer quantity;
+
     private BigDecimal amount;
 
     @Enumerated(EnumType.STRING)

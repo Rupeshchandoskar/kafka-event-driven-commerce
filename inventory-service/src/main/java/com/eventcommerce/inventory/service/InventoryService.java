@@ -28,39 +28,53 @@ public class InventoryService {
 
         log.info("Reserving inventory for orderId={}", payload.getOrderId());
 
-        Inventory inventory = inventoryRepository
-                .findById("product-1")
-                .orElseThrow(() -> new RuntimeException("Inventory not found"));
+        // Get product details from the payload (passed through the order)
+        String productId = payload.getProductId();
+        Integer quantity = payload.getQuantity();
 
-        if (inventory.getAvailableQuantity() <= 0) {
-            log.error("Inventory not available for product-1");
-            throw new RuntimeException("Inventory not available");
+        if (productId == null || quantity == null) {
+            log.error("Product ID or quantity is missing in payload for orderId={}", payload.getOrderId());
+            throw new RuntimeException("Product ID and quantity are required");
         }
 
-        inventory.setAvailableQuantity(inventory.getAvailableQuantity() - 1);
+        Inventory inventory = inventoryRepository
+                .findById(productId)
+                .orElseThrow(() -> {
+                    log.error("Inventory not found for productId={}", productId);
+                    return new RuntimeException("Inventory not found for product: " + productId);
+                });
+
+        if (inventory.getAvailableQuantity() < quantity) {
+            log.error("Insufficient inventory for productId={}. Available={}, Requested={}", 
+                    productId, inventory.getAvailableQuantity(), quantity);
+            throw new RuntimeException("Insufficient inventory available");
+        }
+
+        inventory.setAvailableQuantity(inventory.getAvailableQuantity() - quantity);
 
         inventoryRepository.save(inventory);
 
         InventoryReservation reservation = new InventoryReservation();
 
         reservation.setOrderId(payload.getOrderId());
-        reservation.setProductId("product-1");
-        reservation.setQuantity(1);
+        reservation.setProductId(productId);
+        reservation.setQuantity(quantity);
         reservation.setReservedAt(Instant.now());
 
         reservationRepository.save(reservation);
 
-        log.info("Inventory reserved for orderId={}", payload.getOrderId());
+        log.info("Inventory reserved for orderId={} productId={} quantity={}", 
+                payload.getOrderId(), productId, quantity);
 
-        publishInventoryReservedEvent(payload.getOrderId());
+        publishInventoryReservedEvent(payload.getOrderId(), productId, quantity);
     }
 
-    private void publishInventoryReservedEvent(String orderId) {
+    private void publishInventoryReservedEvent(String orderId, String productId, Integer quantity) {
 
         InventoryReservedPayload payload = new InventoryReservedPayload();
         payload.setOrderId(orderId);
-        payload.setProductId("product-1");
-        payload.setQuantity(1);
+        payload.setProductId(productId);
+        payload.setQuantity(quantity);
 
         BaseEvent<InventoryReservedPayload> event = new BaseEvent<>();
 
@@ -73,5 +87,32 @@ public class InventoryService {
         producer.publishInventoryReserved(event);
 
         log.info("INVENTORY_RESERVED event published for orderId={}", orderId);
+    }
+
+    public void releaseReservedInventory(String orderId) {
+
+        log.info("Releasing reserved inventory for orderId={}", orderId);
+
+        InventoryReservation reservation = reservationRepository
+                .findByOrderId(orderId)
+                .orElseThrow(() -> {
+                    log.error("Reservation not found for orderId={}", orderId);
+                    return new RuntimeException("Reservation not found for order: " + orderId);
+                });
+
+        Inventory inventory = inventoryRepository
+                .findById(reservation.getProductId())
+                .orElseThrow(() -> {
+                    log.error("Inventory not found for productId={}", reservation.getProductId());
+                    return new RuntimeException("Inventory not found");
+                });
+
+        inventory.setAvailableQuantity(inventory.getAvailableQuantity() + reservation.getQuantity());
+        inventoryRepository.save(inventory);
+
+        reservationRepository.delete(reservation);
+
+        log.info("Inventory released for orderId={} productId={} quantity={}", 
+                orderId, reservation.getProductId(), reservation.getQuantity());
     }
 }

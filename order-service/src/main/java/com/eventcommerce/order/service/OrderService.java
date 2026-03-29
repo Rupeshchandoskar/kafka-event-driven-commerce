@@ -30,13 +30,17 @@ public class OrderService {
     @Transactional
     public Order createOrder(OrderRequest request) {
 
-        log.info("Creating order for userId={} amount={}",
+        log.info("Creating order for userId={} productId={} quantity={} amount={}",
                 request.getUserId(),
+                request.getProductId(),
+                request.getQuantity(),
                 request.getAmount());
 
         Order order = new Order();
 
         order.setUserId(request.getUserId());
+        order.setProductId(request.getProductId());
+        order.setQuantity(request.getQuantity());
         order.setAmount(BigDecimal.valueOf(request.getAmount()));
         order.setStatus(OrderStatus.CREATED);
 
@@ -57,6 +61,8 @@ public class OrderService {
 
             payload.setOrderId(order.getId());
             payload.setUserId(order.getUserId());
+            payload.setProductId(order.getProductId());
+            payload.setQuantity(order.getQuantity());
             payload.setAmount(order.getAmount().doubleValue());
 
             BaseEvent<OrderCreatedPayload> event = new BaseEvent<>();

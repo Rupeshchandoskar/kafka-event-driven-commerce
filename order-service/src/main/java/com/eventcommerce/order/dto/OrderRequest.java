@@ -11,6 +11,13 @@ public class OrderRequest {
     private String userId;
 
     @NotNull
+    private String productId;
+
+    @NotNull
+    @Positive
+    private Integer quantity;
+
+    @NotNull
     @Positive
     private Double amount;
 
