@@ -2,10 +2,8 @@ server:
   port: 8081
 
 spring:
-  profiles:
-    active: local
   kafka:
-    bootstrap-servers: kafka:9092
+    bootstrap-servers: localhost:9092
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
@@ -15,7 +13,7 @@ spring:
         spring.json.trusted.packages: "*"
 
   datasource:
-    url: jdbc:postgresql://postgres:5432/orderdb
+    url: jdbc:postgresql://localhost:5432/orderdb
     username: postgres
     password: postgres
     driver-class-name: org.postgresql.Driver
@@ -32,3 +30,4 @@ spring:
 logging:
   level:
     root: INFO
+

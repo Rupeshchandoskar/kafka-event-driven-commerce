@@ -1,12 +1,9 @@
 server:
-  port: 8083
+  port: 8084
 
 spring:
-  profiles:
-    active: local
-
   datasource:
-    url: jdbc:postgresql://postgres:5432/inventorydb
+    url: jdbc:postgresql://localhost:5432/notificationdb
     username: postgres
     password: postgres
 
@@ -19,7 +16,8 @@ spring:
     locations: classpath:db/migration
 
   kafka:
-    bootstrap-servers: kafka:9092
+    bootstrap-servers: localhost:9092
     consumer:
-      group-id: inventory-group
+      group-id: notification-group
       auto-offset-reset: earliest
+

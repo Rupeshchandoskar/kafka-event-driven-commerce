@@ -2,10 +2,8 @@ server:
   port: 8082
 
 spring:
-  profiles:
-    active: local
   datasource:
-    url: jdbc:postgresql://postgres:5432/paymentdb
+    url: jdbc:postgresql://localhost:5432/paymentdb
     username: postgres
     password: postgres
 
@@ -17,9 +15,9 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
-  kafka:
-    bootstrap-servers: kafka:9092
 
+  kafka:
+    bootstrap-servers: localhost:9092
     consumer:
       group-id: payment-group
       auto-offset-reset: earliest
@@ -27,3 +25,4 @@ spring:
 logging:
   level:
     root: INFO
+

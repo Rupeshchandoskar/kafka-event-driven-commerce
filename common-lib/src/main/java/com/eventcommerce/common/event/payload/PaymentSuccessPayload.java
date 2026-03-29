@@ -7,5 +7,7 @@ public class PaymentSuccessPayload {
 
     private String orderId;
     private String paymentId;
+    private String productId;
+    private Integer quantity;
 
 }

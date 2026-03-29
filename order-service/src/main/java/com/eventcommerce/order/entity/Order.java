@@ -4,6 +4,7 @@ import com.eventcommerce.common.enums.OrderStatus;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 
 @Data
@@ -17,7 +18,11 @@ public class Order {
 
     private String userId;
 
-    private Double amount;
+    private String productId;
+
+    private Integer quantity;
+
+    private BigDecimal amount;
 
     @Enumerated(EnumType.STRING)
     private OrderStatus status;

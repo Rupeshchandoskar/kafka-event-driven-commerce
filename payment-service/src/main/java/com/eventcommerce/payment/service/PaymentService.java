@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 
 @Slf4j
@@ -36,7 +37,7 @@ public class PaymentService {
 
         Payment payment = new Payment();
         payment.setOrderId(payload.getOrderId());
-        payment.setAmount(payload.getAmount());
+        payment.setAmount(BigDecimal.valueOf(payload.getAmount()));
 
         if (success) {
             payment.setStatus(PaymentStatus.SUCCESS);
@@ -57,6 +58,8 @@ public class PaymentService {
             PaymentSuccessPayload paymentPayload = new PaymentSuccessPayload();
             paymentPayload.setOrderId(payload.getOrderId());
             paymentPayload.setPaymentId(payment.getId());
+            paymentPayload.setProductId(payload.getProductId());
+            paymentPayload.setQuantity(payload.getQuantity());
 
             BaseEvent<PaymentSuccessPayload> event = new BaseEvent<>();
 
@@ -72,7 +75,34 @@ public class PaymentService {
                     "PaymentSuccessEvent published for orderId={}",
                     payload.getOrderId()
             );
+        } else {
+            // Publish PAYMENT_FAILED event for compensation
+            publishPaymentFailedEvent(payload);
         }
 
     }
+
+    private void publishPaymentFailedEvent(OrderCreatedPayload payload) {
+
+        log.info("Publishing PAYMENT_FAILED event for orderId={}", payload.getOrderId());
+
+        com.eventcommerce.common.event.payload.PaymentFailedPayload failedPayload =
+                new com.eventcommerce.common.event.payload.PaymentFailedPayload();
+
+        failedPayload.setOrderId(payload.getOrderId());
+        failedPayload.setReason("Payment processing failed");
+
+        BaseEvent<com.eventcommerce.common.event.payload.PaymentFailedPayload> event = new BaseEvent<>();
+
+        event.setEventId(IdGenerator.generateEventId());
+        event.setEventType("PAYMENT_FAILED");
+        event.setEventVersion("v1");
+        event.setCreatedAt(Instant.now());
+        event.setPayload(failedPayload);
+
+        producer.publishPaymentFailed(event);
+
+        log.info("PAYMENT_FAILED event published for orderId={}", payload.getOrderId());
+    }
+
 }
